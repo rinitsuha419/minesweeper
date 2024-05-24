@@ -8,8 +8,24 @@
   padding: 0 0.5rem;
 }
 
-.sampleStyle {
+.imageStyle {
   width: 30px;
   height: 30px;
   background: url('~/src/assets/images/icons.png') no-repeat;
+}
+
+.boardStyle {
+  display: flex;
+  flex-wrap: wrap;
+  width: 270px;
+  height: 270px;
+  background-color: #c6c6c6;
+}
+
+.cellStyle {
+  width: 30px;
+  height: 30px;
+  border-color: #919191;
+  border-style: solid;
+  border-width: 1px;
 }
