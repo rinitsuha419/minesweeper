@@ -62,8 +62,16 @@ const Home = () => {
     return bombMap;
   };
   const clickHandler = (x: number, y: number) => {
-    const newBombMap = structuredClone(bombMap);
-    setBombMap(bombSet(x, y, newBombMap));
+    let bombCount = 0;
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        if (bombMap[y][x] === 11) bombCount += 1;
+      }
+    }
+    if (bombCount === 0) {
+      const newBombMap = structuredClone(bombMap);
+      setBombMap(bombSet(x, y, newBombMap));
+    }
   };
 
   const [samplePos, setSamplePos] = useState(0);
@@ -71,17 +79,34 @@ const Home = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.boardStyle}>
-        {bombMap.map((row, y) =>
-          row.map((color, x) => (
-            <div className={styles.cellStyle} key={`${x}-${y}`} onClick={() => clickHandler(x, y)}>
+      <div className={styles.borderStyle}>
+        <div className={styles.infomationStyle}>
+          <div className={styles.countBombStyle}>10</div>
+          <div className={styles.buttonBackStyle}>
+            <div
+              className={styles.buttonStyle}
+              style={{ backgroundPosition: `${-30 * 11}px 0px` }}
+            />
+          </div>
+
+          <div className={styles.timerStyle}>10</div>
+        </div>
+        <div className={styles.bombBordStyle}>
+          {bombMap.map((row, y) =>
+            row.map((color, x) => (
               <div
-                className={styles.imageStyle}
-                style={{ backgroundPosition: `${-30 * bombMap[y][x] + 30}px 0px` }}
-              />
-            </div>
-          )),
-        )}
+                className={styles.cellStyle}
+                key={`${x}-${y}`}
+                onClick={() => clickHandler(x, y)}
+              >
+                <div
+                  className={styles.imageStyle}
+                  style={{ backgroundPosition: `${-30 * board[y][x] + 30}px 0px` }}
+                />
+              </div>
+            )),
+          )}
+        </div>
       </div>
     </div>
   );
