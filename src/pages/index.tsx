@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import styles from './index.module.css';
 
+const directions = [
+  [-1, 1],
+  [0, 1],
+  [1, 1],
+  [1, 0],
+  [1, -1],
+  [0, -1],
+  [-1, -1],
+  [-1, 0],
+];
+
 const Home = () => {
   const [bombMap, setBombMap] = useState([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -24,23 +35,47 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]);
-  const [board, setBoard] = useState([
-    [1, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ]);
+  // const [board, setBoard] = useState([
+  //   [1, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  // ]);
+
+  const board = structuredClone(bombMap);
+  for (let y = 0; y < 9; y++) {
+    for (let x = 0; x < 9; x++) {
+      if (userInput[y][x] === 0) {
+        board[y][x] = -1;
+      } else {
+        let bombCount = 0;
+        for (const [dy, dx] of directions) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || nx >= 9 || ny < 0 || ny >= 9) continue;
+          if (bombMap[ny][nx] === 1) {
+            bombCount += 1;
+          }
+        }
+        board[y][x] = bombMap[y][x] === 1 ? 11 : bombCount;
+      }
+    }
+  }
 
   const bombSet = (x: number, y: number, bombMap: number[][]) => {
-    const bombPos = [];
+    const bombPos: number[][] = [];
     while (bombPos.length < 10) {
       const bombX = Math.floor(Math.random() * 8);
       const bombY = Math.floor(Math.random() * 8);
+      if (x === bombX && y === bombY) {
+        continue;
+      }
+
       const double = [0];
       for (const i of bombPos) {
         if (i[1] === bombX && i[0] === bombY) {
@@ -57,25 +92,31 @@ const Home = () => {
       bombPos.push([bombY, bombX]);
     }
     for (const i of bombPos) {
-      bombMap[i[1]][i[0]] = 11;
+      bombMap[i[1]][i[0]] = 1;
     }
     return bombMap;
   };
+
   const clickHandler = (x: number, y: number) => {
     let bombCount = 0;
     for (let y = 0; y < 9; y++) {
       for (let x = 0; x < 9; x++) {
-        if (bombMap[y][x] === 11) bombCount += 1;
+        if (bombMap[y][x] === 1) {
+          bombCount += 1;
+        }
       }
     }
     if (bombCount === 0) {
       const newBombMap = structuredClone(bombMap);
       setBombMap(bombSet(x, y, newBombMap));
     }
+    const newUserInputs = structuredClone(userInput);
+    newUserInputs[y][x] = 1;
+    setUserInput(newUserInputs);
   };
 
-  const [samplePos, setSamplePos] = useState(0);
-  console.log('sample', samplePos); //samplePosは変数(クリックした回数に関する変数)
+  // const [samplePos, setSamplePos] = useState(0);
+  // console.log('sample', samplePos); //samplePosは変数(クリックした回数に関する変数)
 
   return (
     <div className={styles.container}>
@@ -96,12 +137,15 @@ const Home = () => {
             row.map((color, x) => (
               <div
                 className={styles.cellStyle}
-                key={`${x}-${y}`}
                 onClick={() => clickHandler(x, y)}
+                key={`${x}-${y}`}
+                style={{
+                  borderColor: board[y][x] >= 0 ? '#909090' : '#fff #909090 #909090 #fff ',
+                }}
               >
                 <div
                   className={styles.imageStyle}
-                  style={{ backgroundPosition: `${-30 * board[y][x] + 30}px 0px` }}
+                  style={{ backgroundPosition: `${(board[y][x] - 1) * -30}px 0px` }}
                 />
               </div>
             )),
