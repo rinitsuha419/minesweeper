@@ -36,35 +36,42 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
-  const board = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ];
-  const checkAround = (x: number, y: number) => {
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+
+  const checkAround = (board: number[][], x: number, y: number) => {
+    console.log('opencell');
+    console.log(checkAround);
     let bombCount = 0;
     for (const [dy, dx] of directions) {
       const nx = x + dx;
       const ny = y + dy;
+
       if (nx < 0 || nx >= 9 || ny < 0 || ny >= 9) continue;
       if (bombMap[ny][nx] === 1) {
         bombCount += 1;
       }
     }
     board[y][x] = bombMap[y][x] === 1 ? 11 : bombCount;
+
+    if (bombMap[y][x] === 1) return;
+    for (const [dy, dx] of directions) {
+      const nx = x + dx;
+      const ny = y + dy;
+
+      if (nx < 0 || nx >= 9 || ny < 0 || ny >= 9) continue;
+      if (bombCount === 0 && userInput[ny][nx] === 0 && bombMap[ny][nx] === 0) {
+        userInput[ny][nx] = 1;
+        checkAround(board, nx, ny);
+      }
+    }
   };
+  const board = structuredClone(bombMap);
   for (let y = 0; y < 9; y++) {
     for (let x = 0; x < 9; x++) {
       if (userInput[y][x] === 0) {
         board[y][x] = -1;
       } else {
-        checkAround(x, y);
+        checkAround(board, x, y);
       }
     }
   }
@@ -100,6 +107,9 @@ const Home = () => {
   };
 
   const clickHandler = (x: number, y: number) => {
+    if (isGameOver === true) {
+      return;
+    }
     let bombCount = 0;
     for (let y = 0; y < 9; y++) {
       for (let x = 0; x < 9; x++) {
@@ -107,6 +117,9 @@ const Home = () => {
           bombCount += 1;
         }
       }
+    }
+    if (bombMap[y][x] === 1) {
+      setIsGameOver(true);
     }
     if (bombCount === 0) {
       const newBombMap = structuredClone(bombMap);
@@ -128,7 +141,9 @@ const Home = () => {
           <div className={styles.buttonBackStyle}>
             <div
               className={styles.buttonStyle}
-              style={{ backgroundPosition: `${-30 * 11}px 0px` }}
+              style={{
+                backgroundPosition: isGameOver === true ? `${-30 * 13}px 0px` : `${-30 * 11}px 0px`,
+              }}
             />
           </div>
 
@@ -159,5 +174,3 @@ const Home = () => {
 };
 
 export default Home;
-//計算値...状態と計算値から自動算出する値(オセロのblackpoint)
-//再帰関数…
