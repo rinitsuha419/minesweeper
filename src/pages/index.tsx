@@ -59,8 +59,7 @@ const Home = () => {
       const ny = y + dy;
 
       if (nx < 0 || nx >= 9 || ny < 0 || ny >= 9) continue;
-      if (bombCount === 0 && userInput[ny][nx] === 0 && bombMap[ny][nx] === 0) {
-        userInput[ny][nx] = 1;
+      if (bombCount === 0 && board[ny][nx] === -1 && bombMap[ny][nx] === 0) {
         checkAround(board, nx, ny);
       }
     }
@@ -70,7 +69,13 @@ const Home = () => {
     for (let x = 0; x < 9; x++) {
       if (userInput[y][x] === 0) {
         board[y][x] = -1;
-      } else {
+      }
+    }
+  }
+
+  for (let y = 0; y < 9; y++) {
+    for (let x = 0; x < 9; x++) {
+      if (userInput[y][x] === 1) {
         checkAround(board, x, y);
       }
     }
@@ -78,28 +83,33 @@ const Home = () => {
 
   const bombSet = (x: number, y: number, bombMap: number[][]) => {
     const bombPos: number[][] = [];
-    while (bombPos.length < 10) {
-      const bombX = Math.floor(Math.random() * 8);
-      const bombY = Math.floor(Math.random() * 8);
-      if (x === bombX && y === bombY) {
-        continue;
-      }
+    // while (bombPos.length < 10) {
+    //   const bombX = Math.floor(Math.random() * 8);
+    //   const bombY = Math.floor(Math.random() * 8);
+    //   if (x === bombX && y === bombY) {
+    //     continue;
+    //   }
 
-      const double = [0];
-      for (const i of bombPos) {
-        if (i[1] === bombX && i[0] === bombY) {
-          double[0]++;
-          break;
-        }
-      }
-      if (double[0] === 1) {
-        continue;
-      }
-      if (x === bombX && y === bombY) {
-        continue;
-      }
-      bombPos.push([bombY, bombX]);
+    //   const double = [0];
+    //   for (const i of bombPos) {
+    //     if (i[1] === bombX && i[0] === bombY) {
+    //       double[0]++;
+    //       break;
+    //     }
+    //   }
+    //   if (double[0] === 1) {
+    //     continue;
+    //   }
+    //   if (x === bombX && y === bombY) {
+    //     continue;
+    //   }
+    //   bombPos.push([bombY, bombX]);
+    // }
+    for (let i = 0; i < 9; i++) {
+      bombPos.push([0, i]);
     }
+    bombPos.push([1, 1]);
+
     for (const i of bombPos) {
       bombMap[i[1]][i[0]] = 1;
     }
@@ -107,7 +117,7 @@ const Home = () => {
   };
 
   const clickHandler = (x: number, y: number) => {
-    if (isGameOver === true) {
+    if (isGameOver || isGameClear()) {
       return;
     }
     let bombCount = 0;
@@ -130,6 +140,17 @@ const Home = () => {
     setUserInput(newUserInputs);
   };
 
+  const isGameClear = () => {
+    let bombCount2 = 0;
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        if (board[y][x] !== -1 && bombMap[y][x] !== 1) {
+          bombCount2++;
+        }
+      }
+    }
+    return bombCount2 === 71;
+  };
   // const [samplePos, setSamplePos] = useState(0);
   // console.log('sample', samplePos); //samplePosは変数(クリックした回数に関する変数)
 
@@ -142,7 +163,12 @@ const Home = () => {
             <div
               className={styles.buttonStyle}
               style={{
-                backgroundPosition: isGameOver === true ? `${-30 * 13}px 0px` : `${-30 * 11}px 0px`,
+                backgroundPosition:
+                  isGameOver === true
+                    ? `${-30 * 13}px 0px`
+                    : isGameClear() === true
+                      ? `${-30 * 12}px 0px`
+                      : `${-30 * 11}px 0px`,
               }}
             />
           </div>
