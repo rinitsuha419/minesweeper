@@ -36,7 +36,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
-  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  // const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
   const checkAround = (board: number[][], x: number, y: number) => {
     console.log('opencell');
@@ -83,32 +83,33 @@ const Home = () => {
 
   const bombSet = (x: number, y: number, bombMap: number[][]) => {
     const bombPos: number[][] = [];
-    // while (bombPos.length < 10) {
-    //   const bombX = Math.floor(Math.random() * 8);
-    //   const bombY = Math.floor(Math.random() * 8);
-    //   if (x === bombX && y === bombY) {
-    //     continue;
-    //   }
+    while (bombPos.length < 10) {
+      const bombX = Math.floor(Math.random() * 8);
+      const bombY = Math.floor(Math.random() * 8);
+      if (x === bombX && y === bombY) {
+        continue;
+      }
 
-    //   const double = [0];
-    //   for (const i of bombPos) {
-    //     if (i[1] === bombX && i[0] === bombY) {
-    //       double[0]++;
-    //       break;
-    //     }
-    //   }
-    //   if (double[0] === 1) {
-    //     continue;
-    //   }
-    //   if (x === bombX && y === bombY) {
-    //     continue;
-    //   }
-    //   bombPos.push([bombY, bombX]);
-    // }
-    for (let i = 0; i < 9; i++) {
-      bombPos.push([0, i]);
+      const double = [0];
+      for (const i of bombPos) {
+        if (i[1] === bombX && i[0] === bombY) {
+          double[0]++;
+          break;
+        }
+      }
+      if (double[0] === 1) {
+        continue;
+      }
+      if (x === bombX && y === bombY) {
+        continue;
+      }
+      bombPos.push([bombY, bombX]);
     }
-    bombPos.push([1, 1]);
+    // 確認用にbombが左に寄るようにした
+    // for (let i = 0; i < 9; i++) {
+    //   bombPos.push([0, i]);
+    // }
+    // bombPos.push([1, 1]);
 
     for (const i of bombPos) {
       bombMap[i[1]][i[0]] = 1;
@@ -117,7 +118,7 @@ const Home = () => {
   };
 
   const clickHandler = (x: number, y: number) => {
-    if (isGameOver || isGameClear()) {
+    if (setIsGameOver || isGameClear()) {
       return;
     }
     let bombCount = 0;
@@ -128,9 +129,9 @@ const Home = () => {
         }
       }
     }
-    if (bombMap[y][x] === 1) {
-      setIsGameOver(true);
-    }
+    // if (bombMap[y][x] === 1) {
+    //   setIsGameOver(true);
+    // }
     if (bombCount === 0) {
       const newBombMap = structuredClone(bombMap);
       setBombMap(bombSet(x, y, newBombMap));
@@ -140,6 +141,13 @@ const Home = () => {
     setUserInput(newUserInputs);
   };
 
+  let setIsGameOver = false;
+  const isGameOver = (x: number, y: number) => {
+    if (userInput[y][x] === 1 && bombMap[y][x] === 1) {
+      setIsGameOver = true;
+    }
+    return setIsGameOver;
+  };
   const isGameClear = () => {
     let bombCount2 = 0;
     for (let y = 0; y < 9; y++) {
@@ -160,17 +168,22 @@ const Home = () => {
         <div className={styles.infomationStyle}>
           <div className={styles.countBombStyle}>10</div>
           <div className={styles.buttonBackStyle}>
-            <div
-              className={styles.buttonStyle}
-              style={{
-                backgroundPosition:
-                  isGameOver === true
-                    ? `${-30 * 13}px 0px`
-                    : isGameClear() === true
-                      ? `${-30 * 12}px 0px`
-                      : `${-30 * 11}px 0px`,
-              }}
-            />
+            {bombMap.map((row, y) =>
+              row.map((color, x) => (
+                <div
+                  className={styles.buttonStyle}
+                  key={`${x}-${y}`}
+                  style={{
+                    backgroundPosition:
+                      isGameOver(x, y) === true
+                        ? `${-30 * 13}px 0px`
+                        : isGameClear() === true
+                          ? `${-30 * 12}px 0px`
+                          : `${-30 * 11}px 0px`,
+                  }}
+                />
+              )),
+            )}
           </div>
 
           <div className={styles.timerStyle}>10</div>

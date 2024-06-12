@@ -73,16 +73,21 @@
   background-color: black;
 }
 
+/* にこちゃんマーク */
 .buttonStyle {
-  display: flex;
-  flex-wrap: wrap;
+  /* display: flex; */
+  position: absolute;
+
+  /* flex-wrap: wrap; */
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
+  margin: -2px;
   background: url('~/src/assets/images/icons.png') no-repeat;
 }
 
+/* にこちゃんマークの後ろの石 */
 .buttonBackStyle {
   display: flex;
   align-items: center;
