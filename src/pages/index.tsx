@@ -162,6 +162,34 @@ const Home = () => {
   // const [samplePos, setSamplePos] = useState(0);
   // console.log('sample', samplePos); //samplePosは変数(クリックした回数に関する変数)
 
+  const resetButton = () => {
+    setIsGameOver = false;
+    const newBombMap = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    setBombMap(newBombMap);
+    const newUserInput = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    setUserInput(newUserInput);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.borderStyle}>
@@ -181,6 +209,7 @@ const Home = () => {
                           ? `${-30 * 12}px 0px`
                           : `${-30 * 11}px 0px`,
                   }}
+                  onClick={() => resetButton()}
                 />
               )),
             )}
