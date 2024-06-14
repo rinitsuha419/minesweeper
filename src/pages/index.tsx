@@ -64,6 +64,7 @@ const Home = () => {
       }
     }
   };
+
   const board = structuredClone(bombMap);
   for (let y = 0; y < 9; y++) {
     for (let x = 0; x < 9; x++) {
@@ -226,7 +227,10 @@ const Home = () => {
                 key={`${x}-${y}`}
                 style={{
                   borderColor: board[y][x] >= 0 ? '#909090' : '#fff #909090 #909090 #fff ',
+                  backgroundColor: board[y][x] === 11 ? '#ffaaaa' : '#fff #909090 #909090 #fff ',
+                  backgroundPosition: bombMap[y][x] === 1 ? 0 : '#fff #909090 #909090 #fff ',
                 }}
+                // bombMap[y][x] === 1
               >
                 <div
                   className={styles.imageStyle}
