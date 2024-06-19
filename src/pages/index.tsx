@@ -227,14 +227,19 @@ const Home = () => {
                 key={`${x}-${y}`}
                 style={{
                   borderColor: board[y][x] >= 0 ? '#909090' : '#fff #909090 #909090 #fff ',
-                  backgroundColor: board[y][x] === 11 ? '#ffaaaa' : '#fff #909090 #909090 #fff ',
-                  backgroundPosition: bombMap[y][x] === 1 ? 0 : '#fff #909090 #909090 #fff ',
+                  backgroundColor:
+                    bombMap[y][x] && isGameOver(x, y) && userInput[y][x] ? '#ffaaaa' : '#c6c6c6',
                 }}
                 // bombMap[y][x] === 1
               >
                 <div
                   className={styles.imageStyle}
-                  style={{ backgroundPosition: `${(board[y][x] - 1) * -30}px 0px` }}
+                  style={{
+                    backgroundPosition:
+                      isGameOver(x, y) && bombMap[y][x] === 1
+                        ? `${10 * -30}px 0px`
+                        : `${(board[y][x] - 1) * -30}px 0px`,
+                  }}
                 />
               </div>
             )),
