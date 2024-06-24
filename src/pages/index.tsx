@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styles from './index.module.css';
 
 const directions = [
@@ -86,7 +86,7 @@ const Home = () => {
     return setIsGameOver;
   };
 
-  const isGameClear = () => {
+  const isGameClear = useCallback(() => {
     let bombCount2 = 0;
     for (let y = 0; y < 9; y++) {
       for (let x = 0; x < 9; x++) {
@@ -96,12 +96,32 @@ const Home = () => {
       }
     }
     return bombCount2 === 71;
-  };
+  }, [board, bombMap]);
+
+  // タイマーの状態と管理
+  const [time, setTime] = useState(0);
+  // ゲームが終了したかのフラグ
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    if (isGameStarted) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    if (setIsGameOver === true || isGameClear()) {
+      setIsGameStarted(false);
+    }
+    return () => clearInterval(interval);
+  }, [isGameStarted, time, setIsGameOver, isGameClear]);
 
   const clickHandler = (x: number, y: number) => {
     if (setIsGameOver || isGameClear() || userInput[y][x] === 2) {
       return;
     }
+    if (!isGameStarted) setIsGameStarted(true); // ゲーム開始時にタイマーをスタート
     let bombCount = 0;
     for (let y = 0; y < 9; y++) {
       for (let x = 0; x < 9; x++) {
@@ -149,33 +169,33 @@ const Home = () => {
 
   const bombSet = (x: number, y: number, bombMap: number[][]) => {
     const bombPos: number[][] = [];
-    while (bombPos.length < 10) {
-      const bombX = Math.floor(Math.random() * 8);
-      const bombY = Math.floor(Math.random() * 8);
-      if (x === bombX && y === bombY) {
-        continue;
-      }
+    // while (bombPos.length < 10) {
+    //   const bombX = Math.floor(Math.random() * 8);
+    //   const bombY = Math.floor(Math.random() * 8);
+    //   if (x === bombX && y === bombY) {
+    //     continue;
+    //   }
 
-      const double = [0];
-      for (const i of bombPos) {
-        if (i[1] === bombX && i[0] === bombY) {
-          double[0]++;
-          break;
-        }
-      }
-      if (double[0] === 1) {
-        continue;
-      }
-      if (x === bombX && y === bombY) {
-        continue;
-      }
-      bombPos.push([bombY, bombX]);
-    }
-    // 確認用にbombが左に寄るようにした
-    // for (let i = 0; i < 9; i++) {
-    //   bombPos.push([0, i]);
+    //   const double = [0];
+    //   for (const i of bombPos) {
+    //     if (i[1] === bombX && i[0] === bombY) {
+    //       double[0]++;
+    //       break;
+    //     }
+    //   }
+    //   if (double[0] === 1) {
+    //     continue;
+    //   }
+    //   if (x === bombX && y === bombY) {
+    //     continue;
+    //   }
+    //   bombPos.push([bombY, bombX]);
     // }
-    // bombPos.push([1, 1]);
+    // 確認用にbombが左に寄るようにした
+    for (let i = 0; i < 9; i++) {
+      bombPos.push([0, i]);
+    }
+    bombPos.push([1, 1]);
 
     for (const i of bombPos) {
       bombMap[i[1]][i[0]] = 1;
@@ -246,7 +266,7 @@ const Home = () => {
             )}
           </div>
 
-          <div className={styles.timerStyle}>10</div>
+          <div className={styles.timerStyle}>{time}</div>
         </div>
         <div className={styles.bombBordStyle}>
           {bombMap.map((row, y) =>
