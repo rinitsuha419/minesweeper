@@ -36,11 +36,7 @@ const Home = () => {
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]);
 
-  // const [isGameOver, setIsGameOver] = useState<boolean>(false);
-
   const checkAround = (board: number[][], x: number, y: number) => {
-    console.log('opencell');
-    console.log(checkAround);
     let bombCount = 0;
     for (const [dy, dx] of directions) {
       const nx = x + dx;
@@ -65,19 +61,88 @@ const Home = () => {
     }
   };
 
-  const board = structuredClone(bombMap);
-  for (let y = 0; y < 9; y++) {
-    for (let x = 0; x < 9; x++) {
-      if (userInput[y][x] === 0) {
-        board[y][x] = -1;
-      }
-    }
-  }
+  const board = bombMap.map((row) => row.map(() => -1));
 
   for (let y = 0; y < 9; y++) {
     for (let x = 0; x < 9; x++) {
       if (userInput[y][x] === 1) {
         checkAround(board, x, y);
+      }
+    }
+  }
+
+  let setIsGameOver = false;
+  const isGameOver = (x: number, y: number) => {
+    if (userInput[y][x] === 1 && bombMap[y][x] === 1) {
+      for (let y = 0; y < 9; y++) {
+        for (let x = 0; x < 9; x++) {
+          if (bombMap[y][x] === 1 && userInput[y][x] !== 2) {
+            board[y][x] = 11;
+          }
+        }
+      }
+      setIsGameOver = true;
+    }
+    return setIsGameOver;
+  };
+
+  const isGameClear = () => {
+    let bombCount2 = 0;
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        if (board[y][x] !== -1 && bombMap[y][x] !== 1) {
+          bombCount2++;
+        }
+      }
+    }
+    return bombCount2 === 71;
+  };
+
+  const clickHandler = (x: number, y: number) => {
+    if (setIsGameOver || isGameClear() || userInput[y][x] === 2) {
+      return;
+    }
+    let bombCount = 0;
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        if (bombMap[y][x] === 1) {
+          bombCount += 1;
+        }
+      }
+    }
+
+    if (bombCount === 0) {
+      const newBombMap = structuredClone(bombMap);
+      setBombMap(bombSet(x, y, newBombMap));
+    }
+    const newUserInputs = structuredClone(userInput);
+    newUserInputs[y][x] = 1;
+    setUserInput(newUserInputs);
+  };
+
+  const rightClickHandler = (x: number, y: number, event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (board[y][x] === -1) {
+      userInput[y][x] = 2;
+      const newUserInputs = structuredClone(userInput);
+      setUserInput(newUserInputs);
+    }
+    if (board[y][x] === 10) {
+      userInput[y][x] = 0;
+      const newUserInputs = structuredClone(userInput);
+      setUserInput(newUserInputs);
+    } else {
+      return;
+    }
+  };
+
+  for (let y = 0; y < 9; y++) {
+    for (let x = 0; x < 9; x++) {
+      if (userInput[y][x] === 2 && board[y][x] === -1) {
+        board[y][x] = 10;
+      }
+      if (userInput[y][x] === 0 && board[y][x] === 10) {
+        board[y][x] = -1;
       }
     }
   }
@@ -118,50 +183,15 @@ const Home = () => {
     return bombMap;
   };
 
-  const clickHandler = (x: number, y: number) => {
-    if (setIsGameOver || isGameClear()) {
-      return;
-    }
-    let bombCount = 0;
+  if (isGameClear()) {
     for (let y = 0; y < 9; y++) {
       for (let x = 0; x < 9; x++) {
         if (bombMap[y][x] === 1) {
-          bombCount += 1;
+          board[y][x] = 10;
         }
       }
     }
-    // if (bombMap[y][x] === 1) {
-    //   setIsGameOver(true);
-    // }
-    if (bombCount === 0) {
-      const newBombMap = structuredClone(bombMap);
-      setBombMap(bombSet(x, y, newBombMap));
-    }
-    const newUserInputs = structuredClone(userInput);
-    newUserInputs[y][x] = 1;
-    setUserInput(newUserInputs);
-  };
-
-  let setIsGameOver = false;
-  const isGameOver = (x: number, y: number) => {
-    if (userInput[y][x] === 1 && bombMap[y][x] === 1) {
-      setIsGameOver = true;
-    }
-    return setIsGameOver;
-  };
-  const isGameClear = () => {
-    let bombCount2 = 0;
-    for (let y = 0; y < 9; y++) {
-      for (let x = 0; x < 9; x++) {
-        if (board[y][x] !== -1 && bombMap[y][x] !== 1) {
-          bombCount2++;
-        }
-      }
-    }
-    return bombCount2 === 71;
-  };
-  // const [samplePos, setSamplePos] = useState(0);
-  // console.log('sample', samplePos); //samplePosは変数(クリックした回数に関する変数)
+  }
 
   const resetButton = () => {
     setIsGameOver = false;
@@ -224,9 +254,15 @@ const Home = () => {
               <div
                 className={styles.cellStyle}
                 onClick={() => clickHandler(x, y)}
+                onContextMenu={(event) => {
+                  rightClickHandler(x, y, event);
+                }}
                 key={`${x}-${y}`}
                 style={{
-                  borderColor: board[y][x] >= 0 ? '#909090' : '#fff #909090 #909090 #fff ',
+                  borderColor:
+                    board[y][x] >= 0 && board[y][x] !== 10
+                      ? '#909090'
+                      : '#fff #909090 #909090 #fff ',
                   backgroundColor:
                     bombMap[y][x] && isGameOver(x, y) && userInput[y][x] ? '#ffaaaa' : '#c6c6c6',
                 }}
@@ -235,10 +271,7 @@ const Home = () => {
                 <div
                   className={styles.imageStyle}
                   style={{
-                    backgroundPosition:
-                      isGameOver(x, y) && bombMap[y][x] === 1
-                        ? `${10 * -30}px 0px`
-                        : `${(board[y][x] - 1) * -30}px 0px`,
+                    backgroundPosition: `${(board[y][x] - 1) * -30}px 0px`,
                   }}
                 />
               </div>
